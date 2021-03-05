@@ -74,6 +74,22 @@ mod test {
         assert_guard!(let Some(_) = foo(bar));
     }
 
+    #[test]
+    #[ignore]
+    fn should_not_evaluate_matched_expression_twice() {
+        use std::sync::{Arc, Mutex};
+        let n = Arc::new(Mutex::new(0));
+        let result = std::panic::catch_unwind(|| {
+            assert_guard!(let Option::None = {
+            let mut value = n.lock().unwrap();
+            *value += 1;
+            Some(*value)
+          });
+        });
+        assert!(result.is_err());
+        assert_eq!(*n.lock().unwrap(), 1);
+    }
+
     // todo: add comment to PR about using $crate, which only works since 1.30
     // todo: worry about double evaluation of expression
     // todo:
