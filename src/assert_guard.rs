@@ -1,22 +1,30 @@
 #[macro_export]
 macro_rules! assert_guard {
-    (let $pattern:pat = $expression:expr) => {
+    ($($input:tt)*) => {
         $crate::guard!(
-            let $pattern = $expression else { panic!() }
+            $($input)* else { $crate::assert_guard_panic!($($input)*) }
         );
+    };
+}
+
+#[macro_export]
+macro_rules! assert_guard_panic {
+    (let $pattern:pat = $expression:expr) => {
+        panic!(
+            "assertion failed: `let {} = {}`\n  matched value: `{:?}`",
+            stringify!($pattern),
+            stringify!($expression),
+            $expression
+        )
     };
 }
 
 #[cfg(test)]
 mod test {
-    // use super::*;
-
     #[test]
     fn should_match() {
         let val: Option<()> = None;
         assert_guard!(let Option::None = val);
-        // todo: remove
-        let _ = val;
     }
 
     #[test]
@@ -56,9 +64,8 @@ mod test {
 
     #[test]
     #[should_panic(
-        expected = "assertion failed: `let Some(_) = bar(foo)`\n  matched value: `None`"
+        expected = "assertion failed: `let Some(_) = foo(bar)`\n  matched value: `None`"
     )]
-    #[ignore]
     fn should_have_nice_panic_message() {
         let bar = true;
         fn foo(_: bool) -> Option<()> {
@@ -74,4 +81,6 @@ mod test {
     // todo: figure out different guard synteces
     // todo: negation syntax?
     // todo: add comment to PR about using $crate, which only works since 1.30
+    // todo: worry about double evaluation of expression
+    // todo: worry about things that don't implement Debug
 }
