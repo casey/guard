@@ -14,7 +14,7 @@ macro_rules! assert_guard_panic {
             "assertion failed: `let {} = {}`\n  matched value: `{:?}`",
             stringify!($pattern),
             stringify!($expression),
-            $expression
+            $expression,
         )
     };
 }
@@ -74,13 +74,10 @@ mod test {
         assert_guard!(let Some(_) = foo(bar));
     }
 
-    #[test]
-    #[ignore]
-    fn should_work_for_non_debug_types() {}
-
-    // todo: figure out different guard synteces
-    // todo: negation syntax?
     // todo: add comment to PR about using $crate, which only works since 1.30
     // todo: worry about double evaluation of expression
-    // todo: worry about things that don't implement Debug
+    // todo:
+    // - worry about things that don't implement Debug
+    // - http://lukaskalbertodt.github.io/2019/12/05/generalized-autoref-based-specialization.html#quick-recap-method-resolution
+    // todo: document that only one guard! macro syntax is supported
 }
